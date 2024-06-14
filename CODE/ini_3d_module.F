@@ -319,6 +319,11 @@ CONTAINS
       RHOW(K)=RHOZ(K)  ! This line added with removal of equivalence in constld
   102 CONTINUE
 
+!EDD test Q1Q2
+      DO 192 K = 1, NK3
+        Q1LS(K) = 0. ! [K/s]
+        Q2LS(K) = 0. ! [kg/kg/s]
+  192 CONTINUE
 !      DO 200 K = 2, NK3
 !      IF ( ZT(K) .LT. 15000. ) THEN
 !      K1 = INDEXR(PBAR(K)*0.01,NQ1,PQ1,LF)
@@ -533,7 +538,7 @@ CONTAINS
 
       CALL petsc_solver_initialize(petsc_cr)
 
-      restart_read: IF (.false.)THEN
+      restart_read: IF (.true.)THEN
 
 !   restart( thermodynamic_file (absolute path) , hydrometer , 
 !            dynamic_variables , {optional} dynamic_file (absolute path) )
@@ -546,11 +551,11 @@ CONTAINS
 !        >>>> read all dynamic variables
 !   If dynamic_variables is true, dynamic_file should be defined.  By Der 20190128
 
-      thermodynamic_file = "/work/peter50504/VVM/DATA/tcvvm_qobs_large_uras/archive/&
-              &tcvvm_qobs_large_uras.L.Thermodynamic-000030.nc"
+      thermodynamic_file = "/data/W.eddie/VVM/DATA/kuo_test/archive/&
+            &kuo_test.L.Thermodynamic-000003.nc"
 
-      dynamic_file = "/work/peter50504/VVM/DATA/tcvvm_qobs_large_uras/archive/&
-              &tcvvm_qobs_large_uras.L.Dynamic-000030.nc" 
+      dynamic_file = "/data/W.eddie/VVM/DATA/kuo_test/archive/&
+            &kuo_test.L.Dynamic-000003.nc"
 
       write(*,*) trim(thermodynamic_file), trim(dynamic_file)
 
