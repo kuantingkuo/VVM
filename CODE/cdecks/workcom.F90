@@ -19,7 +19,9 @@ PRIVATE
       ug,       & ! a given profile of zonal velocity (m/s)
       vg,       & ! a given profile of meridional velocity (m/s)
       q1ls,     & ! large scale forcing for potential temp. (K/s) 
-      q2ls        ! large scale forcing for water vapor (kg/kg/s)
+      q2ls,     & ! large scale forcing for water vapor (kg/kg/s)
+      QRL,      & ! large scale forccing for longwave radiation (K/s)
+      QRS         ! large scale forccing for shortwave radiation (K/s)
       
 !*****************************
 ! formerly common/comp2ld/

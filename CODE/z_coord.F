@@ -50,12 +50,19 @@ CONTAINS
       ZT(K) = ZT(K) * ( CZ1 + CZ2 * ZT(K) )
    50 CONTINUE
 
-      filename="/data/W.eddie/filename.txt"
+      filename="/data/W.eddie/GoAmazon/Congo_ZINT_20141124T0000.txt"
+      OPEN(939,FILE=trim(filename))
+      READ(939,*)
+   111 FORMAT(F15.8)
+      DO k=1,nk2
+        READ(939,111) ZZ(k+1)
+      ENDDO
+      CLOSE(939)
+      filename="/data/W.eddie/GoAmazon/Congo_20141124T0000.txt"
       OPEN(939,FILE=trim(filename))
       READ(939,*)
       DO k=1,nk2
-        READ(939,111) ZZ(k+1), ZT(k+1)
-        111 FORMAT(2F16.4)
+        READ(939,111) ZT(k+1)
       ENDDO
       CLOSE(939)
 

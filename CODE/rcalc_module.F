@@ -122,6 +122,8 @@ CONTAINS
       DO 300 K = 2, NK2
       DO 309 J = 1, MJ1
       DO 309 I = 1, MI1
+      Q1LS(K) = (THBAR(K) - TH3D(I,J,K)) / 1800.
+      Q2LS(K) = (QVBAR(K) - QV3D(I,J,K)) / 1800.
       FTH3D(I,J,K,L)=FTH3D(I,J,K,L) + Q1LS (K)
       FQV3D(I,J,K,L)=FQV3D(I,J,K,L) + Q2LS (K)
   309 CONTINUE
