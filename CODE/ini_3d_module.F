@@ -116,25 +116,24 @@ CONTAINS
 !*****************************************************
 !SST=299.88K
 
-      SST = 300.
-      
 !     initialization for SP nudging profile
       filename="/data/W.eddie/GoAmazon/Congo_20141124T0000.txt"
       OPEN(939,FILE=trim(filename))
       READ(939,*)
       DO k=1,nk2
-        READ(939,111) PBAR(k+1), THBAR(k+1), QVBAR(k+1), Q1LS(k+1), Q2LS(k+1),  &
+        READ(939,111) PBAR(k+1), T(k+1), QVBAR(k+1), Q1LS(k+1), Q2LS(k+1),  &
                        QRL(k+1), QRS(k+1), UG(k+1), VG(k+1)
         111 FORMAT(16X,2(F15.8,X),E25.18,X,E21.14,X,E28.21,X,E22.15,X,E23.16,2(X,F15.8))
       ENDDO
       CLOSE(939)
 
       PBAR(1)=PBAR(2)
-      THBAR(1)=THBAR(2)
+      T(1)=T(2)
       QVBAR(1)=QVBAR(2)
+      SST=T(1)
 
       PBAR(nk3)=PBAR(nk2)+(PBAR(nk2)-PBAR(nk1))/(ZT(nk2)-ZT(nk1))*(ZT(nk3)-ZT(nk2))
-      THBAR(nk3)=THBAR(nk2)+(THBAR(nk2)-THBAR(nk1))/(ZT(nk2)-ZT(nk1))*(ZT(nk3)-ZT(nk2))
+      T(nk3)=T(nk2)+(T(nk2)-T(nk1))/(ZT(nk2)-ZT(nk1))*(ZT(nk3)-ZT(nk2))
       QVBAR(nk3)=QVBAR(nk2)+(QVBAR(nk2)-QVBAR(nk1))/(ZT(nk2)-ZT(nk1))*(ZT(nk3)-ZT(nk2))
       Q1LS(nk3)=0.
       Q2LS(nk3)=0.
@@ -143,12 +142,12 @@ CONTAINS
 !      PBAR=PBAR*100.
 
       PIBAR=(PBAR/100000.)**(2./7.)
-      RHO=PBAR/(rgas*THBAR*PIBAR)
+      RHO=PBAR/(rgas*T)
       DO k=1,nk2
         RHOZ(k)=RHO(k)+(RHO(k+1)-RHO(k))/(ZT(k+1)-ZT(k))*(ZZ(k)-ZT(k))
       ENDDO
  
-      THBAR=THBAR/PIBAR
+      THBAR=T/PIBAR
 
       IF (my_task == 0) THEN
       WRITE(*,*) "initial profiles"
