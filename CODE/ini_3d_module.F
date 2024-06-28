@@ -109,7 +109,7 @@ CONTAINS
       CZ2 = ( DZ - DZ1 ) / ( DZ * ( DOMAIN - DZ ) )
       CZ1 = 1. - CZ2 * DOMAIN
 
-      CALL COORDS_2D ( CZ1, CZ2, DZ, ZB )
+      CALL COORDS_2D ( CZ1, CZ2, DZ, ZB, DZ1 )
 
 !*****************************************************
 !     1. OBTAIN 1D THERMODYNAMICAL PROFILE
@@ -117,7 +117,7 @@ CONTAINS
 !SST=299.88K
 
 !     initialization for SP nudging profile
-      filename="/data/W.eddie/GoAmazon/Congo_20141124T0000.txt"
+      filename="/data/W.eddie/GoAmazon/Congo_20141124T0000_interp.txt"
       OPEN(939,FILE=trim(filename))
       READ(939,*)
       DO k=1,nk2
@@ -137,6 +137,8 @@ CONTAINS
       QVBAR(nk3)=QVBAR(nk2)+(QVBAR(nk2)-QVBAR(nk1))/(ZT(nk2)-ZT(nk1))*(ZT(nk3)-ZT(nk2))
       Q1LS(nk3)=0.
       Q2LS(nk3)=0.
+      UG(nk2-2:nk3)=0.
+      VG(nk2-2:nk3)=0.
 
 !      QVBAR=QVBAR*0.001
 !      PBAR=PBAR*100.

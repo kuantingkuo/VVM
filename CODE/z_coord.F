@@ -11,14 +11,16 @@ PUBLIC :: coords_2d
 
 CONTAINS
 
-   SUBROUTINE COORDS_2D ( CZ1, CZ2, DZ, ZB )
+   SUBROUTINE COORDS_2D ( CZ1, CZ2, DZ, ZB, DZ1)
    
 ! arg list
       REAL (KIND=dbl_kind), INTENT(IN) ::  &
          cz1,    &
          cz2,    &
-         dz,     &
          zb
+      REAL (KIND=dbl_kind), INTENT(INOUT) ::  &
+         dz,     &
+         dz1
          
 ! local variables
       INTEGER (KIND=int_kind) :: k  ! vertical loop index
@@ -50,15 +52,8 @@ CONTAINS
       ZT(K) = ZT(K) * ( CZ1 + CZ2 * ZT(K) )
    50 CONTINUE
 
-      filename="/data/W.eddie/GoAmazon/Congo_ZINT_20141124T0000.txt"
-      OPEN(939,FILE=trim(filename))
-      READ(939,*)
    111 FORMAT(F15.8)
-      DO k=1,nk2
-        READ(939,111) ZZ(k+1)
-      ENDDO
-      CLOSE(939)
-      filename="/data/W.eddie/GoAmazon/Congo_20141124T0000.txt"
+      filename="/data/W.eddie/GoAmazon/Congo_20141124T0000_interp.txt"
       OPEN(939,FILE=trim(filename))
       READ(939,*)
       DO k=1,nk2
@@ -66,8 +61,15 @@ CONTAINS
       ENDDO
       CLOSE(939)
 
+      DO k=2,nk2
+        ZZ(k) = (ZT(k) + ZT(k+1)) / 2.
+      ENDDO
+
       ZZ(1)=ZB
       ZT(1)=ZB
+
+      DZ = ZT(2) - ZT(1)
+      DZ1 = ZZ(2) - ZZ(1)
 
       ZZ(NK3)=2*ZZ(NK2)-ZZ(NK1)
       ZT(NK3)=2*ZT(NK2)-ZT(NK1)
