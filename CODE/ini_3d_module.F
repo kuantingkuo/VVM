@@ -117,7 +117,7 @@ CONTAINS
 !SST=299.88K
 
 !     initialization for SP nudging profile
-      filename="/data/W.eddie/GoAmazon/Congo_20141124T0000_interp.txt"
+      filename="initial_txt"
       OPEN(939,FILE=trim(filename))
       READ(939,*)
       DO k=1,nk2
