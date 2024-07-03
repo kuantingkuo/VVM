@@ -13,7 +13,6 @@ USE force_3d_module
 USE advec_3d_module
 USE timer
 USE domain_decomposition
-USE utils, only: XYAVG2
 
 IMPLICIT NONE
 PRIVATE
@@ -44,7 +43,7 @@ CONTAINS
 
       INTEGER (KIND=int_kind) ::  &
          tempim  ! global index 
-      REAL (KIND=dbl_kind) :: THMN(NK3),QVMN(NK3)
+
 !-----------------------------------------------------------------------
       L = N2
 
@@ -120,11 +119,7 @@ CONTAINS
 !   FORCING BY THE LARGE SCALE VERTICAL WIND.
 !   (Modified June 2009, TRJ)
       IF (Q1Q2) THEN
-      CALL XYAVG2(TH3D,nhalo,mi1,mj1,NK3,1,NK3,THMN)
-      CALL XYAVG2(QV3D,nhalo,mi1,mj1,nk3,1,NK3,QVMN)
       DO 300 K = 2, NK2
-      Q1LS(K) = (THBAR(K) - THMN(K)) / 1800.
-      Q2LS(K) = (QVBAR(K) - QVMN(K)) / 1800.
       DO 309 J = 1, MJ1
       DO 309 I = 1, MI1
       FTH3D(I,J,K,L)=FTH3D(I,J,K,L) + Q1LS (K)

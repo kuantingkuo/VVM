@@ -117,7 +117,7 @@ CONTAINS
 !SST=299.88K
 
 !     initialization for SP nudging profile
-      filename="/data/W.eddie/GoAmazon/Congo_20141124T0000_interp.txt"
+      filename="initial_txt"
       OPEN(939,FILE=trim(filename))
       READ(939,*)
       DO k=1,nk2
@@ -137,8 +137,11 @@ CONTAINS
       QVBAR(nk3)=QVBAR(nk2)+(QVBAR(nk2)-QVBAR(nk1))/(ZT(nk2)-ZT(nk1))*(ZT(nk3)-ZT(nk2))
       Q1LS(nk3)=0.
       Q2LS(nk3)=0.
+      QRL(nk2-2:nk3)=0.
+      QRS(nk2-2:nk3)=0.
       UG(nk2-2:nk3)=0.
       VG(nk2-2:nk3)=0.
+      Q1LS(:) = Q1LS(:) + QRL(:) + QRS(:)
 
 !      QVBAR=QVBAR*0.001
 !      PBAR=PBAR*100.
@@ -542,7 +545,7 @@ CONTAINS
 
       CALL petsc_solver_initialize(petsc_cr)
 
-      restart_read: IF (.false.)THEN
+      restart_read: IF (.true.) THEN
 
 !   restart( thermodynamic_file (absolute path) , hydrometer , 
 !            dynamic_variables , {optional} dynamic_file (absolute path) )
@@ -555,11 +558,9 @@ CONTAINS
 !        >>>> read all dynamic variables
 !   If dynamic_variables is true, dynamic_file should be defined.  By Der 20190128
 
-      thermodynamic_file = "/data/W.eddie/VVM/DATA/kuo_test/archive/&
-            &kuo_test.L.Thermodynamic-000003.nc"
+      thermodynamic_file = "restart_thermo.nc"
 
-      dynamic_file = "/data/W.eddie/VVM/DATA/kuo_test/archive/&
-            &kuo_test.L.Dynamic-000003.nc"
+      dynamic_file = "restart_dynamic.nc"
 
       write(*,*) trim(thermodynamic_file), trim(dynamic_file)
 
