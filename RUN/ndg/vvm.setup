@@ -5,7 +5,7 @@
 #--------------------------------------------------------------------- 
 
 set echo  # echoes the commands
-set expname = 20141124T0000
+set expname = 20141124T0100
 
 # set job system and compiler
 set compiler = 'intel_mogamd'
@@ -14,7 +14,7 @@ set jobsys = 'slurm_mogamd_intel'
 # set paths
 set vvmdir = ` pwd | rev | cut -c 9- | rev `
 set datadir = ${vvmdir}'/DATA'
-set rundir = ${vvmdir}'/RUN'
+set rundir = `pwd`
 set expdir = ${datadir}'/'${expname}
 set codedir = ${datadir}'/'${expname}'/CODE'
 
@@ -27,7 +27,7 @@ if( ! -d ${expdir} ) then      # if ${subdir} is not found, create it!
   cd ${expdir}
 else
   cd ${expdir}
-  alias rm rm
+  alias rm /usr/bin/rm
   rm -rf *
 endif
 
@@ -35,7 +35,7 @@ mkdir RUNDATA
 mkdir archive
 
 # prepare tables for model
-cp ${rundir}/t01/vvm.setup .
+cp ${rundir}/vvm.setup .
 cp ${vvmdir}/CODE/make_ctl.sh .
 
 # for NOAH LSM
@@ -62,7 +62,6 @@ cat > definesld.com << 'END1'
 #define PHYSICS
 #define MICROCODE
 #define MICROP3
-#define AREAMN
 'END1'
 cat definesld.com
 
@@ -75,12 +74,12 @@ cat > DOMAIN << 'END3'
 #!/bin/csh
 set expdir = ` pwd `
 set codedir = ${expdir}'/CODE'
-set inic = /data/W.eddie/GoAmazon/Congo_20141124T0000_interp.txt
+set inic = /data/W.eddie/GoAmazon/Congo_20141124T0100.txt
 sed -i 's/zonal_dimension/64/g' ${codedir}/cdecks/PARMSLD.F90 
 sed -i 's/merid_dimension/64/g' ${codedir}/cdecks/PARMSLD.F90
 sed -i 's/zonal_decomposition/2/g' ${codedir}/cdecks/PARMSLD.F90
 sed -i 's/merid_decomposition/2/g' ${codedir}/cdecks/PARMSLD.F90
-sed -i 's/vert_dimension/30/g' ${codedir}/cdecks/PARMSLD.F90
+sed -i 's/vert_dimension/26/g' ${codedir}/cdecks/PARMSLD.F90
 sed -i 's/tracer_dimension/0/g' ${codedir}/cdecks/PARMSLD.F90
 sed -i 's/diag2d_dimension/0/g' ${codedir}/cdecks/PARMSLD.F90
 sed -i 's/diag3d_dimension/0/g' ${codedir}/cdecks/PARMSLD.F90
@@ -91,13 +90,13 @@ cat DOMAIN
 
 # input data
 cat > INPUT << 'END6'
- &INPUT1 NEWRUN=T, ITTADD=21600 /
+ &INPUT1 NEWRUN=T, ITTADD=8640. /
  &INPUT2 RLAT=-4.240837696335078, RLON=26.25 /
- &INPUT3 DX=2000.,DYNEW=2000.,DZ=500.,DZ1=100.,DT=10.,NOTURB=F,NOSFX=T,NSFLUX=12,ALADV=1.,UVTAU=1800. /
+ &INPUT3 DX=2000.,DYNEW=2000.,DZ=500.,DZ1=100.,DT=10.,NOTURB=F,NOSFX=T,NSFLUX=12,ALADV=1.,UVTAU=21600. /
 #           (m)          (m)     (m)     (m)    (s)                (time step)
- &INPUT4 NXS=1,NXSAVG=3600,NWR11=1,NFLPRT=1,NRESTART=60 /
+ &INPUT4 NXS=1,NXSAVG=360,NWR11=1,NFLPRT=1,NRESTART=60 /
 #         ( case output frequency)   ( result could be seen in ncfile)
- &INPUT5 IX=3182073,ITINIT=1,ITSTOP=360,SCALE=6.,Q1Q2=T,DTRAD=60.,petsc_cr=0 /
+ &INPUT5 IX=3182073,ITINIT=0,ITSTOP=2,Z2PERT=2000.,SCALE=6.,Q1Q2=T,DTRAD=60.,petsc_cr=0 /
 #                                                              (s)
 'END6'
 cat INPUT

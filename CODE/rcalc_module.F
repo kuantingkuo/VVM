@@ -125,8 +125,6 @@ CONTAINS
       DO 300 K = 2, NK2
       Q1LS(K) = (THBAR(K) - THMN(K)) / 7200.
       Q2LS(K) = (QVBAR(K) - QVMN(K)) / 7200.
-      Q1LS(K) = Q1LS(K) * (ITT-1)/(ITTADD-1)
-      Q2LS(K) = Q2LS(K) * (ITT-1)/(ITTADD-1)
       DO 309 J = 1, MJ1
       DO 309 I = 1, MI1
       FTH3D(I,J,K,L)=FTH3D(I,J,K,L) + Q1LS (K)

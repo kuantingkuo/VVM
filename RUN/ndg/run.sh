@@ -5,11 +5,11 @@ if [ $(git symbolic-ref --short HEAD) != 'sp_ndg' ]; then
     exit
 fi
 
-for file in /data/W.eddie/GoAmazon/Congo_*_interp.txt; do
+for file in /data/W.eddie/GoAmazon/Congo_20141124T????.txt; do
     cd /data/W.eddie/VVM/RUN/ndg
     filename=$(basename "$file")
     temp="${filename#Congo_}"
-    datetime="${temp%_interp.txt}"
+    datetime="${temp%.txt}"
 
     echo $datetime
     if [ -e /data/W.eddie/VVM/DATA/${datetime} ];then
