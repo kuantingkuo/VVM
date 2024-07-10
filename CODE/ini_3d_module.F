@@ -109,7 +109,7 @@ CONTAINS
       CZ2 = ( DZ - DZ1 ) / ( DZ * ( DOMAIN - DZ ) )
       CZ1 = 1. - CZ2 * DOMAIN
 
-      CALL COORDS_2D ( CZ1, CZ2, DZ, ZB, DZ1 )
+      CALL COORDS_2D ( CZ1, CZ2, DZ, ZB )
 
 !*****************************************************
 !     1. OBTAIN 1D THERMODYNAMICAL PROFILE
@@ -135,19 +135,13 @@ CONTAINS
       PBAR(nk3)=PBAR(nk2)+(PBAR(nk2)-PBAR(nk1))/(ZT(nk2)-ZT(nk1))*(ZT(nk3)-ZT(nk2))
       T(nk3)=T(nk2)+(T(nk2)-T(nk1))/(ZT(nk2)-ZT(nk1))*(ZT(nk3)-ZT(nk2))
       QVBAR(nk3)=QVBAR(nk2)+(QVBAR(nk2)-QVBAR(nk1))/(ZT(nk2)-ZT(nk1))*(ZT(nk3)-ZT(nk2))
-      Q1LS(nk3)=0.
-      Q2LS(nk3)=0.
-      QRL(nk2-2:nk3)=0.
-      QRS(nk2-2:nk3)=0.
-      UG(nk2-2:nk3)=0.
-      VG(nk2-2:nk3)=0.
       Q1LS(:) = Q1LS(:) + QRL(:) + QRS(:)
 
 !      QVBAR=QVBAR*0.001
 !      PBAR=PBAR*100.
 
       PIBAR=(PBAR/100000.)**(2./7.)
-      RHO=PBAR/(rgas*T)
+      RHO=PBAR/(rgas*T*(1.+0.608*QVBAR))
       DO k=1,nk2
         RHOZ(k)=RHO(k)+(RHO(k+1)-RHO(k))/(ZT(k+1)-ZT(k))*(ZZ(k)-ZT(k))
       ENDDO

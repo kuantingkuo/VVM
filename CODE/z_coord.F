@@ -11,16 +11,14 @@ PUBLIC :: coords_2d
 
 CONTAINS
 
-   SUBROUTINE COORDS_2D ( CZ1, CZ2, DZ, ZB, DZ1)
+   SUBROUTINE COORDS_2D ( CZ1, CZ2, DZ, ZB )
    
 ! arg list
       REAL (KIND=dbl_kind), INTENT(IN) ::  &
          cz1,    &
          cz2,    &
-         zb
-      REAL (KIND=dbl_kind), INTENT(INOUT) ::  &
          dz,     &
-         dz1
+         zb
          
 ! local variables
       INTEGER (KIND=int_kind) :: k  ! vertical loop index
@@ -67,9 +65,6 @@ CONTAINS
 
       ZZ(1)=ZB
       ZT(1)=ZB
-
-      DZ = ZT(2) - ZT(1)
-      DZ1 = ZZ(2) - ZZ(1)
 
       ZZ(NK3)=2*ZZ(NK2)-ZZ(NK1)
       ZT(NK3)=2*ZT(NK2)-ZT(NK1)

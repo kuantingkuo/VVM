@@ -16,7 +16,7 @@ for dir in /data/W.eddie/VVM/DATA/20141124T????; do
         continue
     fi
 
-    file=/data/W.eddie/GoAmazon/Congo_${datetime}_interp.txt
+    file=/data/W.eddie/GoAmazon/Congo_${datetime}.txt
     sed -i "8s|\(set expname = \).*|\1${runname}|" vvm.setup
     sed -i "s|\(set inic = \).*|\1${file}|" vvm.setup
     temp=$(ls -t ${dir}/archive | head -n 1)

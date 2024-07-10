@@ -27,7 +27,7 @@ if( ! -d ${expdir} ) then      # if ${subdir} is not found, create it!
   cd ${expdir}
 else
   cd ${expdir}
-  alias rm rm
+  alias rm /usr/bin/rm
   rm -rf *
 endif
 
@@ -62,7 +62,6 @@ cat > definesld.com << 'END1'
 #define PHYSICS
 #define MICROCODE
 #define MICROP3
-#define AREAMN
 'END1'
 cat definesld.com
 
@@ -75,14 +74,14 @@ cat > DOMAIN << 'END3'
 #!/bin/csh
 set expdir = ` pwd `
 set codedir = ${expdir}'/CODE'
-set inic = /data/W.eddie/GoAmazon/Congo_20141124T0600_interp.txt
-set rst_thrm = /data/W.eddie/VVM/DATA/20141124T0600/archive/20141124T0600.L.Thermodynamic-000006.nc
-set rst_dynm = /data/W.eddie/VVM/DATA/20141124T0600/archive/20141124T0600.L.Dynamic-000006.nc
+set inic = /data/W.eddie/GoAmazon/Congo_20141124T0600.txt
+set rst_thrm = /data/W.eddie/VVM/DATA/20141124T0600/archive/20141124T0600.L.Thermodynamic-000024.nc
+set rst_dynm = /data/W.eddie/VVM/DATA/20141124T0600/archive/20141124T0600.L.Dynamic-000024.nc
 sed -i 's/zonal_dimension/64/g' ${codedir}/cdecks/PARMSLD.F90 
 sed -i 's/merid_dimension/64/g' ${codedir}/cdecks/PARMSLD.F90
 sed -i 's/zonal_decomposition/2/g' ${codedir}/cdecks/PARMSLD.F90
 sed -i 's/merid_decomposition/2/g' ${codedir}/cdecks/PARMSLD.F90
-sed -i 's/vert_dimension/30/g' ${codedir}/cdecks/PARMSLD.F90
+sed -i 's/vert_dimension/26/g' ${codedir}/cdecks/PARMSLD.F90
 sed -i 's/tracer_dimension/0/g' ${codedir}/cdecks/PARMSLD.F90
 sed -i 's/diag2d_dimension/0/g' ${codedir}/cdecks/PARMSLD.F90
 sed -i 's/diag3d_dimension/0/g' ${codedir}/cdecks/PARMSLD.F90
@@ -97,7 +96,7 @@ cat DOMAIN
 cat > INPUT << 'END6'
  &INPUT1 NEWRUN=T, ITTADD=180 /
  &INPUT2 RLAT=-4.240837696335078, RLON=26.25 /
- &INPUT3 DX=2000.,DYNEW=2000.,DZ=500.,DZ1=100.,DT=10.,NOTURB=F,NOSFX=T,NSFLUX=12,ALADV=1.,UVTAU=1800. /
+ &INPUT3 DX=2000.,DYNEW=2000.,DZ=500.,DZ1=100.,DT=10.,NOTURB=F,NOSFX=T,NSFLUX=12,ALADV=1.,UVTAU=21600. /
 #           (m)          (m)     (m)     (m)    (s)                (time step)
  &INPUT4 NXS=1,NXSAVG=6,NWR11=1,NFLPRT=1,NRESTART=60 /
 #         ( case output frequency)   ( result could be seen in ncfile)
