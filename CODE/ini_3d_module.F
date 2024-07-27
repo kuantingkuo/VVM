@@ -65,7 +65,7 @@ CONTAINS
       logical lf
       DATA NU1/6/,NT1/29/,NQ1/20/
       REAL(kind=dbl_kind) :: rbcp, t8, p8, qv8, qc8, qi8, dummy, gdzbcp, cpbr, &
-                             es1, alphaw, pbarmb
+                             es1, alphaw, pbarmb, rpgx, rpgy
       REAL (KIND=dbl_kind) :: T(NK3),H(NK3),TV(NK3),PILOG(NK3),ALPHA(NK3)  &
           ,QCBAR(NK3),QVSBAR(NK3)
       REAL (KIND=dbl_kind) :: ZT1(29),PI1(29),TV1(29),PILOG1(29)
@@ -433,10 +433,18 @@ CONTAINS
 !     2. SET UP the thermodynamic variables for 3D-frame
 !*********************************************************
 
+      rpgx = 2. * 3.14159265358979323846 / real(mi_glob, kind=dbl_kind)
+      rpgy = rpgx * real( NINT(VG(6)/UG(6)), kind=dbl_kind )
       DO 500 K = 1, NK3
       DO 500 J = mjm,mjp
       DO 500 I = mim,mip
+      IF (K .le. 8) THEN
+      TH3D(I,J,K) = THBAR(K) + 1. * SIN(1.* ( & !-1.*ZT(K)/1200. * 3.14159265358979323846 + &
+                    real(mi1*ni_sbdm+I-1, kind=dbl_kind)*rpgx &
+                  + real(mj1*nj_sbdm+J-1, kind=dbl_kind)*rpgy ))
+      ELSE
       TH3D(I,J,K) = THBAR(K)
+      ENDIF
       !IF (sqrt(((real(mi1*ni_sbdm+I)-mi_glob/8*3)/32.)**2&
       !        !+((real(mi1*ni_sbdm+I)-64)/16.)**2&
       !        +((ZT(K)-6000.)/2000.)**2)<=1)THEN
@@ -539,7 +547,7 @@ CONTAINS
 
       CALL petsc_solver_initialize(petsc_cr)
 
-      restart_read: IF (.true.) THEN
+      restart_read: IF (.false.) THEN
 
 !   restart( thermodynamic_file (absolute path) , hydrometer , 
 !            dynamic_variables , {optional} dynamic_file (absolute path) )
