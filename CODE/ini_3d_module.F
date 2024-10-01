@@ -127,6 +127,9 @@ CONTAINS
       ENDDO
       CLOSE(939)
 
+      Q1LS(:) = 0.
+      Q2LS(:) = 0.
+
       PBAR(1)=PBAR(2)
       T(1)=T(2)
       QVBAR(1)=QVBAR(2)
