@@ -129,6 +129,10 @@ CONTAINS
 
       Q1LS(:) = 0.
       Q2LS(:) = 0.
+      QRL(:) = 0.
+      QRS(:) = 0.
+      UG(:) = 0.
+      VG(:) = 0.
 
       PBAR(1)=PBAR(2)
       T(1)=T(2)
@@ -436,18 +440,10 @@ CONTAINS
 !     2. SET UP the thermodynamic variables for 3D-frame
 !*********************************************************
 
-      rpgx = 2. * 3.14159265358979323846 / real(mi_glob, kind=dbl_kind)
-      rpgy = rpgx * real( NINT(VG(6)/UG(6)), kind=dbl_kind )
       DO 500 K = 1, NK3
       DO 500 J = mjm,mjp
       DO 500 I = mim,mip
-      IF (K .le. 8) THEN
-      TH3D(I,J,K) = THBAR(K) + 1. * SIN(1.* ( & !-1.*ZT(K)/1200. * 3.14159265358979323846 + &
-                    real(mi1*ni_sbdm+I-1, kind=dbl_kind)*rpgx &
-                  + real(mj1*nj_sbdm+J-1, kind=dbl_kind)*rpgy ))
-      ELSE
       TH3D(I,J,K) = THBAR(K)
-      ENDIF
       !IF (sqrt(((real(mi1*ni_sbdm+I)-mi_glob/8*3)/32.)**2&
       !        !+((real(mi1*ni_sbdm+I)-64)/16.)**2&
       !        +((ZT(K)-6000.)/2000.)**2)<=1)THEN
@@ -526,7 +522,11 @@ CONTAINS
       DO 600 I = mim,mip
       Z3DX(I,J,K)=0.
       Z3DY(I,J,K)=0.
+      IF (K .eq. 6 .and. mi1*ni_sbdm+I .le. 8 .and. mj1*nj_sbdm+J .le. 8) THEN
+      W3D(I,J,K) = 0.8
+      ELSE
       W3D(I,J,K) =0.
+      ENDIF
   600 CONTINUE
 
       DO 610 K = 1, NK3

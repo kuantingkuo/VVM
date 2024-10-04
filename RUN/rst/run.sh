@@ -8,7 +8,8 @@ fi
 for dir in /data/W.eddie/VVM/DATA/20141124T????; do
     cd /data/W.eddie/VVM/RUN/rst
     datetime=$(basename "$dir")
-    runname=${datetime}_run
+    runname=${datetime}_1Kx3
+#    runname=test_run
 
     echo $datetime
     if [ -e /data/W.eddie/VVM/DATA/${runname} ];then
