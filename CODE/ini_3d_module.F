@@ -104,7 +104,8 @@ CONTAINS
 
       CHARACTER(200) :: thermodynamic_file, dynamic_file, tg_file, topo_file
       REAL (KIND=dbl_kind) :: R, Ru, Rv, WMEAN, valW, pi_const, lamda_u, lamda_v, DIA
-      REAL (KIND=dbl_kind) :: UR_u, UR_v, weightW
+      REAL (KIND=dbl_kind) :: UR_u, UR_v, weightW, ZW0, ZD, ZD_u, ZEXP
+      REAL (KIND=dbl_kind) :: FUNC_z, FUNC_u, FUNC_v
       INTEGER :: levW
 
       casename= 'GATE_PHASE_III'
@@ -520,75 +521,74 @@ CONTAINS
 !*******************************************
 !     3. SET UP CIRCULATION
 !*******************************************
-      levW = 6
+      levW = 4
       valW = 0.8
-      weightW = valW / 0.4626700755964605146
       DIA = 4000. ! [m]
+      weightW = valW / 0.4626700755964605146
+      ZW0 = ZZ(levW)
       pi_const = 3.14159265358979323846
       DO 600 K = 1, NK2
+      ZD = ZW0**2-(ZZ(K)-ZW0)**2
+      ZD_u = ZW0**2-((ZT(K)-ZW0))**2
+      ZEXP = EXP(1.-(ZW0**2)/ZD)
+      FUNC_z = weightW * EXP(1.-(ZW0**2)/ZD_u) * DIA / pi_const &
+              * (2.*(ZW0**2)*(ZT(K)-ZW0)/(ZD_u**2) &
+                - (RHOW(K+1)-RHOW(K))/(ZZ(K+1)-ZZ(K))/RHO(K))
       DO 600 J = mjm,mjp
       DO 600 I = mim,mip
+      W3D(I,J,K) =0.
       Z3DX(I,J,K)=0.
       Z3DY(I,J,K)=0.
-      R = sqrt((real(mi1*ni_sbdm+I)-64.5)**2 + (real(mj1*nj_sbdm+J)-64.5)**2) * 500.
-      IF (K .eq. levW &
-           .and. R .le. DIA/2.) THEN
-      W3D(I,J,K) = weightW * cos(pi_const/DIA*R) !for W mean
-!      W3D(I,J,K) = sqrt(2.2**2 &
-!              * cos(3.14159265358979323846/DIA*R)**2 / 0.2973576327153244571) !for KE mean
-!          .and. abs(real(mi1*ni_sbdm+I)-127.51) .lt. 4. &
-!          .and. abs(real(mj1*nj_sbdm+J)-127.51) .lt. 4.) THEN
-!      W3D(I,J,K) = 0.1
-      ELSE IF (K .eq. levW .and. R .le. DIA*3./2.) THEN
-      W3D(I,J,K) = weightW * pi_const/16. * cos(pi_const/DIA*R) !for W mean
-      ELSE
-      W3D(I,J,K) =0.
-      ENDIF
-  600 CONTINUE
-      CALL XYAVG1(W3D(:,:,levW),1,mi1,mj1,WMEAN)
-      W3D(:,:,levW) = W3D(:,:,levW) - WMEAN
-
-      DO 610 K = 1, NK3
-      DO 610 J = mjm,mjp
-      DO 610 I = mim,mip
-      Ru = sqrt((real(mi1*ni_sbdm+I)-64.)**2 + (real(mj1*nj_sbdm+J)-64.5)**2)*500. ! [m]
-      Rv = sqrt((real(mi1*ni_sbdm+I)-64.5)**2 + (real(mj1*nj_sbdm+J)-64.)**2)*500. ! [m]
-      UR_u = 0.
-      UR_v = 0.
-      Z3DZ(I,J,K)=0.
-!      U3DX(I,J,K)=UG(K)
-!      U3DY(I,J,K)=VG(K)
       U3DX(I,J,K)=0.
       U3DY(I,J,K)=0.
-      IF ((K .eq. levW .OR. K .eq. levW+1) .AND. (Ru .le. DIA*3./2. .OR. Rv .le. DIA*3./2.)) THEN
-       lamda_u = atan2(real(mj1*nj_sbdm+J)-64.5, real(mi1*ni_sbdm+I)-64.)
-       lamda_v = atan2(real(mj1*nj_sbdm+J)-64., real(mi1*ni_sbdm+I)-64.5)
-       IF (Ru .le. DIA/2.) THEN
-        UR_u = weightW * DIA / (pi_const*(ZZ(K+1)-ZZ(K))) &
-              * (sin(pi_const/DIA*Ru)+DIA/Ru/pi_const*cos(pi_const/DIA*Ru))
-       ELSE
-        UR_u = weightW*pi_const/16. * DIA / (pi_const*(ZZ(K+1)-ZZ(K))) &
-              * (sin(pi_const/DIA*Ru)+DIA/Ru/pi_const*cos(pi_const/DIA*Ru))
-       ENDIF
-       IF (Rv .le. DIA/2.) THEN
-        UR_v = weightW * DIA / (pi_const*(ZZ(K+1)-ZZ(K))) &
-              * (sin(pi_const/DIA*Rv)+DIA/Rv/pi_const*cos(pi_const/DIA*Rv))
-       ELSE
-        UR_v = weightW*pi_const/16. * DIA / (pi_const*(ZZ(K+1)-ZZ(K))) &
-              * (sin(pi_const/DIA*Rv)+DIA/Rv/pi_const*cos(pi_const/DIA*Rv))
-       ENDIF
-
-       IF (K .eq. levW) THEN
-        U3DX(I,J,K)=UR_u * ((RHOW(K)-RHOW(K+1))/RHO(K) - 1.) * cos(lamda_u)
-        U3DY(I,J,K)=UR_v * ((RHOW(K)-RHOW(K+1))/RHO(K) - 1.) * sin(lamda_v)
-       ELSE
-        U3DX(I,J,K)=UR_u * ((RHOW(K)-RHOW(K+1))/RHO(K) + 1.) * cos(lamda_u)
-        U3DY(I,J,K)=UR_v * ((RHOW(K)-RHOW(K+1))/RHO(K) + 1.) * sin(lamda_v)
-       ENDIF
-       U3DX(I,J,K)=U3DX(I,J,K)*0.195
-       U3DY(I,J,K)=U3DY(I,J,K)*0.195
+      IF (ZD .gt. 0.) THEN
+      R = sqrt((real(mi1*ni_sbdm+I)-64.5)**2 + (real(mj1*nj_sbdm+J)-64.5)**2) * DX
+      IF (R .le. DIA/2.) THEN
+      W3D(I,J,K) = weightW * cos(pi_const/DIA*R) * ZEXP
+      ELSE IF (R .le. DIA*3./2.) THEN
+      W3D(I,J,K) = weightW * pi_const/16. * cos(pi_const/DIA*R) * ZEXP
       ENDIF
-  610 CONTINUE
+      ENDIF
+      IF (ZD_u .gt. 0.) THEN
+      Ru = sqrt((real(mi1*ni_sbdm+I)-64.)**2 + (real(mj1*nj_sbdm+J)-64.5)**2) * DX ! [m]
+      Rv = sqrt((real(mi1*ni_sbdm+I)-64.5)**2 + (real(mj1*nj_sbdm+J)-64.)**2) * DYNEW
+      FUNC_u = sin(pi_const/DIA*Ru)+DIA/Ru/pi_const*cos(pi_const/DIA*Ru)
+      FUNC_v = sin(pi_const/DIA*Rv)+DIA/Rv/pi_const*cos(pi_const/DIA*Rv)
+      UR_u = 0.
+      UR_v = 0.
+      lamda_u = atan2(real(mj1*nj_sbdm+J)-64.5, real(mi1*ni_sbdm+I)-64.)
+      lamda_v = atan2(real(mj1*nj_sbdm+J)-64., real(mi1*ni_sbdm+I)-64.5)
+      IF (Ru .le. DIA/2.) THEN
+        UR_u = FUNC_z * FUNC_u
+      ELSE IF (Ru .le. DIA*3./2.) THEN
+        UR_u = FUNC_z * pi_const/16. * FUNC_u
+      ENDIF
+      IF (Rv .le. DIA/2.) THEN
+        UR_v = FUNC_z * FUNC_v
+      ELSE IF (Rv .le. DIA*3./2.) THEN
+        UR_v = FUNC_z * pi_const/16. * FUNC_v
+      ENDIF
+      U3DX(I,J,K) = UR_u * cos(lamda_u)
+      U3DY(I,J,K) = UR_v * sin(lamda_v)
+      U3DX(I,J,K) = U3DX(I,J,K)*0.1
+      U3DY(I,J,K) = U3DY(I,J,K)*0.1
+      ENDIF
+  600 CONTINUE
+
+      DO K = 1, NK2
+      ZD = ZW0**2-(ZZ(K)-ZW0)**2
+      IF (ZD .gt. 0.) THEN
+      CALL XYAVG1(W3D(:,:,K),1,mi1,mj1,WMEAN)
+      W3D(:,:,K) = W3D(:,:,K) - WMEAN
+      ENDIF
+      ENDDO
+
+      DO 620 K = 1, NK3
+      DO 620 J = mjm,mjp
+      DO 620 I = mim,mip
+      Z3DZ(I,J,K)=(U3DY(I+1,J,K)-U3DY(I,J,K))/DX  &
+                 -(U3DX(I,J+1,K)-U3DY(I,J,K))/DYNEW
+  620 CONTINUE
 
       DO 660 K = 2, NK1
       DO 660 J = 1, MJ1
@@ -597,8 +597,6 @@ CONTAINS
                  -(U3DX(I,J,K+1)-U3DX(I,J,K))*FNZ(K)/DZ
       Z3DX(I,J,K)=(W3D(I,J+1,K)-W3D(I,J,K))/DYNEW &
                  -(U3DY(I,J,K+1)-U3DY(I,J,K))*FNZ(K)/DZ
-      Z3DZ(I,J,K)=(U3DY(I+1,J,K)-U3DY(I,J,K))/DX  &
-                 -(U3DX(I,J+1,K)-U3DY(I,J,K))/DY
   660 CONTINUE
 
       CALL petsc_solver_initialize(petsc_cr)
