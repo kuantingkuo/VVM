@@ -565,17 +565,17 @@ CONTAINS
        lamda_v = atan2(real(mj1*nj_sbdm+J)-64., real(mi1*ni_sbdm+I)-64.5)
        IF (Ru .le. DIA/2.) THEN
         UR_u = weightW * DIA / (pi_const*(ZZ(K+1)-ZZ(K))) &
-              * (sin(pi_const/DIA*Ru)+DIA/Ru/pi_const*cos(pi_const/DIA*Ru)+1.)
+              * (sin(pi_const/DIA*Ru)+DIA/Ru/pi_const*cos(pi_const/DIA*Ru))
        ELSE
         UR_u = weightW*pi_const/16. * DIA / (pi_const*(ZZ(K+1)-ZZ(K))) &
-              * (sin(pi_const/DIA*Ru)+DIA/Ru/pi_const*cos(pi_const/DIA*Ru)+1.)
+              * (sin(pi_const/DIA*Ru)+DIA/Ru/pi_const*cos(pi_const/DIA*Ru))
        ENDIF
        IF (Rv .le. DIA/2.) THEN
         UR_v = weightW * DIA / (pi_const*(ZZ(K+1)-ZZ(K))) &
-              * (sin(pi_const/DIA*Rv)+DIA/Rv/pi_const*cos(pi_const/DIA*Rv)+1.)
+              * (sin(pi_const/DIA*Rv)+DIA/Rv/pi_const*cos(pi_const/DIA*Rv))
        ELSE
         UR_v = weightW*pi_const/16. * DIA / (pi_const*(ZZ(K+1)-ZZ(K))) &
-              * (sin(pi_const/DIA*Rv)+DIA/Rv/pi_const*cos(pi_const/DIA*Rv)+1.)
+              * (sin(pi_const/DIA*Rv)+DIA/Rv/pi_const*cos(pi_const/DIA*Rv))
        ENDIF
 
        IF (K .eq. levW) THEN
@@ -585,8 +585,8 @@ CONTAINS
         U3DX(I,J,K)=UR_u * ((RHOW(K)-RHOW(K+1))/RHO(K) + 1.) * cos(lamda_u)
         U3DY(I,J,K)=UR_v * ((RHOW(K)-RHOW(K+1))/RHO(K) + 1.) * sin(lamda_v)
        ENDIF
-       U3DX(I,J,K)=U3DX(I,J,K)*0.2
-       U3DY(I,J,K)=U3DY(I,J,K)*0.2
+       U3DX(I,J,K)=U3DX(I,J,K)*0.195
+       U3DY(I,J,K)=U3DY(I,J,K)*0.195
       ENDIF
   610 CONTINUE
 
@@ -597,6 +597,8 @@ CONTAINS
                  -(U3DX(I,J,K+1)-U3DX(I,J,K))*FNZ(K)/DZ
       Z3DX(I,J,K)=(W3D(I,J+1,K)-W3D(I,J,K))/DYNEW &
                  -(U3DY(I,J,K+1)-U3DY(I,J,K))*FNZ(K)/DZ
+      Z3DZ(I,J,K)=(U3DY(I+1,J,K)-U3DY(I,J,K))/DX  &
+                 -(U3DX(I,J+1,K)-U3DY(I,J,K))/DY
   660 CONTINUE
 
       CALL petsc_solver_initialize(petsc_cr)
