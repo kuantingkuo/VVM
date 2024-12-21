@@ -103,10 +103,9 @@ CONTAINS
       DATA V1/ -2.0, -2.0, 7.0, 0.0, 0.0, 0.0/
 
       CHARACTER(200) :: thermodynamic_file, dynamic_file, tg_file, topo_file
-      REAL (KIND=dbl_kind) :: R, Ru, Rv, WMEAN, valW, pi_const, lamda_u, lamda_v, DIA
-      REAL (KIND=dbl_kind) :: UR_u, UR_v, weightW, ZW0, ZD, ZD_u, ZEXP
-      REAL (KIND=dbl_kind) :: FUNC_z, FUNC_u, FUNC_v
-      INTEGER :: levW
+      INTEGER :: nc_err, ncid, varid, rank
+      INTEGER(KIND=mpi_offset_kind), DIMENSION(4) :: arraystart, readlen
+      REAL, DIMENSION(1:MI1,1:MJ1,1:NK2) :: dummy3d
 
       casename= 'GATE_PHASE_III'
 
@@ -448,14 +447,6 @@ CONTAINS
       DO 500 J = mjm,mjp
       DO 500 I = mim,mip
       TH3D(I,J,K) = THBAR(K)
-      !IF (sqrt(((real(mi1*ni_sbdm+I)-mi_glob/8*3)/32.)**2&
-      !        !+((real(mi1*ni_sbdm+I)-64)/16.)**2&
-      !        +((ZT(K)-6000.)/2000.)**2)<=1)THEN
-      !  TH3D(I,J,K) = TH3D(I,J,K) - 15.*(cos(3.14159265*0.5* &
-      !                sqrt(((real(mi1*ni_sbdm+I)-mi_glob/8*3)/32.)**2+ &
-      !                     !((real(mi1*ni_sbdm+I)-64)/16.)**2+ &
-      !                     ((ZT(K)-6000.)/2000.)**2)))**2
-      !ENDIF
       QV3D(I,J,K) = QVBAR(K)
       QC3D(I,J,K) = 0.
       QI3D(I,J,K) = 0.
@@ -521,67 +512,93 @@ CONTAINS
 !*******************************************
 !     3. SET UP CIRCULATION
 !*******************************************
-      levW = 4
-      valW = 0.8
-      DIA = 4000. ! [m]
-      weightW = valW / 0.4626700755964605146
-      ZW0 = ZZ(levW)
-      pi_const = 3.14159265358979323846
-      DO 600 K = 1, NK2
-      ZD = ZW0**2-(ZZ(K)-ZW0)**2
-      ZD_u = ZW0**2-((ZT(K)-ZW0))**2
-      ZEXP = EXP(1.-(ZW0**2)/ZD)
-      FUNC_z = weightW * EXP(1.-(ZW0**2)/ZD_u) * DIA / pi_const &
-              * (2.*(ZW0**2)*(ZT(K)-ZW0)/(ZD_u**2) &
-                - (RHOW(K+1)-RHOW(K))/(ZZ(K+1)-ZZ(K))/RHO(K))
-      DO 600 J = mjm,mjp
-      DO 600 I = mim,mip
-      W3D(I,J,K) =0.
-      Z3DX(I,J,K)=0.
-      Z3DY(I,J,K)=0.
-      U3DX(I,J,K)=0.
-      U3DY(I,J,K)=0.
-      IF (ZD .gt. 0.) THEN
-      R = sqrt((real(mi1*ni_sbdm+I)-64.5)**2 + (real(mj1*nj_sbdm+J)-64.5)**2) * DX
-      IF (R .le. DIA/2.) THEN
-      W3D(I,J,K) = weightW * cos(pi_const/DIA*R) * ZEXP
-      ELSE IF (R .le. DIA*3./2.) THEN
-      W3D(I,J,K) = weightW * pi_const/16. * cos(pi_const/DIA*R) * ZEXP
-      ENDIF
-      ENDIF
-      IF (ZD_u .gt. 0.) THEN
-      Ru = sqrt((real(mi1*ni_sbdm+I)-64.)**2 + (real(mj1*nj_sbdm+J)-64.5)**2) * DX ! [m]
-      Rv = sqrt((real(mi1*ni_sbdm+I)-64.5)**2 + (real(mj1*nj_sbdm+J)-64.)**2) * DYNEW
-      FUNC_u = sin(pi_const/DIA*Ru)+DIA/Ru/pi_const*cos(pi_const/DIA*Ru)
-      FUNC_v = sin(pi_const/DIA*Rv)+DIA/Rv/pi_const*cos(pi_const/DIA*Rv)
-      UR_u = 0.
-      UR_v = 0.
-      lamda_u = atan2(real(mj1*nj_sbdm+J)-64.5, real(mi1*ni_sbdm+I)-64.)
-      lamda_v = atan2(real(mj1*nj_sbdm+J)-64., real(mi1*ni_sbdm+I)-64.5)
-      IF (Ru .le. DIA/2.) THEN
-        UR_u = FUNC_z * FUNC_u
-      ELSE IF (Ru .le. DIA*3./2.) THEN
-        UR_u = FUNC_z * pi_const/16. * FUNC_u
-      ENDIF
-      IF (Rv .le. DIA/2.) THEN
-        UR_v = FUNC_z * FUNC_v
-      ELSE IF (Rv .le. DIA*3./2.) THEN
-        UR_v = FUNC_z * pi_const/16. * FUNC_v
-      ENDIF
-      U3DX(I,J,K) = UR_u * cos(lamda_u)
-      U3DY(I,J,K) = UR_v * sin(lamda_v)
-      U3DX(I,J,K) = U3DX(I,J,K)*0.1
-      U3DY(I,J,K) = U3DY(I,J,K)*0.1
-      ENDIF
-  600 CONTINUE
+      W3D(:,:,:) = 0.
+      U3DX(:,:,:) = 0.
+      U3DY(:,:,:) = 0.
+      dynamic_file = "/data/W.eddie/VVM/DATA/test_bubble_const_10/archive/test_bubble_const_10.L.Dynamic-000018.nc"
+      CALL MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
+      WRITE(*,*) "Rank:", rank, "Attempting to open file:", TRIM(dynamic_file)
 
-      DO K = 1, NK2
-      ZD = ZW0**2-(ZZ(K)-ZW0)**2
-      IF (ZD .gt. 0.) THEN
-      CALL XYAVG1(W3D(:,:,K),1,mi1,mj1,WMEAN)
-      W3D(:,:,K) = W3D(:,:,K) - WMEAN
+      nc_err = nfmpi_open(mpi_comm_world, TRIM(dynamic_file), nf_nowrite, mpi_info_null, ncid)
+      IF (nc_err /= 0) THEN
+      WRITE(*,*) "ERROR: Failed to open file:", nfmpi_strerror(nc_err)
+      STOP
       ENDIF
-      ENDDO
+
+      CALL MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
+      arraystart = (/(NI_SBDM)*MI1 + 1, (NJ_SBDM)*MJ1 + 1, 1, 1/)
+      readlen = (/MI1, MJ1, NK2, 1/)
+      WRITE(*,*) "Rank:", rank, "Arraystart:", arraystart, "Readlen:", readlen
+
+      nc_err = nfmpi_begin_indep_data(ncid)
+      IF (nc_err /= 0) THEN
+      WRITE(*,*) "ERROR: Failed to begin independent mode:", nfmpi_strerror(nc_err)
+      STOP
+      ENDIF
+
+      nc_err = nfmpi_inq_varid(ncid, 'w', varid)
+      IF (nc_err /= 0) THEN
+      WRITE(*,*) "ERROR: Failed to find variable 'w':", nfmpi_strerror(nc_err)
+      STOP
+      ENDIF
+      WRITE(*,*) "Rank:", rank, "Variable ID for 'w':", varid
+
+      WRITE(*,*) "Reading 'w'..."
+      nc_err = nfmpi_get_vara_real(ncid, varid, arraystart, readlen, dummy3d)
+      IF (nc_err /= 0) THEN
+      WRITE(*,*) "ERROR: Failed to read 'w':", nfmpi_strerror(nc_err)
+      STOP
+      ENDIF
+
+      WRITE(*,*) "Rank:", rank, "Successfully read 'w'."
+      W3D(1:MI1,1:MJ1,1:NK2) = REAL(dummy3d, kind=dbl_kind)
+
+      nc_err = nfmpi_inq_varid(ncid, 'u', varid)
+      IF (nc_err /= 0) THEN
+      WRITE(*,*) "ERROR: Failed to find variable 'u':", nfmpi_strerror(nc_err)
+      STOP
+      ENDIF
+      WRITE(*,*) "Rank:", rank, "Variable ID for 'u':", varid
+
+      WRITE(*,*) "Reading 'u'..."
+      nc_err = nfmpi_get_vara_real(ncid, varid, arraystart, readlen, dummy3d)
+      IF (nc_err /= 0) THEN
+      WRITE(*,*) "ERROR: Failed to read 'u':", nfmpi_strerror(nc_err)
+      STOP
+      ENDIF
+
+      WRITE(*,*) "Rank:", rank, "Successfully read 'u'."
+      U3DX(1:MI1,1:MJ1,1:NK2) = REAL(dummy3d, kind=dbl_kind)
+
+      nc_err = nfmpi_inq_varid(ncid, 'v', varid)
+      IF (nc_err /= 0) THEN
+      WRITE(*,*) "ERROR: Failed to find variable 'v':", nfmpi_strerror(nc_err)
+      STOP
+      ENDIF
+      WRITE(*,*) "Rank:", rank, "Variable ID for 'v':", varid
+
+      WRITE(*,*) "Reading 'v'..."
+      nc_err = nfmpi_get_vara_real(ncid, varid, arraystart, readlen, dummy3d)
+      IF (nc_err /= 0) THEN
+      WRITE(*,*) "ERROR: Failed to read 'v':", nfmpi_strerror(nc_err)
+      STOP
+      ENDIF
+
+      WRITE(*,*) "Rank:", rank, "Successfully read 'v'."
+      U3DY(1:MI1,1:MJ1,1:NK2) = REAL(dummy3d, kind=dbl_kind)
+
+      nc_err = nfmpi_end_indep_data(ncid)
+      IF (nc_err /= 0) THEN
+          WRITE(*,*) "ERROR: Failed to end independent mode:", nfmpi_strerror(nc_err)
+          STOP
+      ENDIF
+
+      nc_err = nfmpi_close(ncid)
+      IF (nc_err /= 0) THEN
+      WRITE(*,*) "ERROR: Failed to close file:", nfmpi_strerror(nc_err)
+      STOP
+      ENDIF
+
 
       DO 620 K = 1, NK3
       DO 620 J = mjm,mjp
