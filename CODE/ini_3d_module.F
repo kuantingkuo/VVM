@@ -443,7 +443,7 @@ CONTAINS
 !*********************************************************
 
       levW = 2
-      valW = 10. ! mean value
+      valW = 20. ! mean value
 !      weightW = valW / 0.4626700755964605146 ! max. value theoretical value
       weightW = valW / 0.4748218472511392575 ! max. value calibrated by output
       DIA = 4000. ! [m]

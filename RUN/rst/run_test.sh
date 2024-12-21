@@ -1,19 +1,19 @@
 #!/usr/bin/bash
 
-if [ $(git symbolic-ref --short HEAD) != 'sp' ]; then
-    echo 'Git branch not at sp!'
+if [ $(git symbolic-ref --short HEAD) != 'sp_bubble' ]; then
+    echo 'Git branch not at sp_bubble!'
     exit
 fi
 
 inif=/data/W.eddie/VVM/CODE/ini_3d_module.F
 #for txt in /data/W.eddie/GoAmazon_VVM/inic.txt; do
 for txt in /data/W.eddie/GoAmazon_VVM/inic_const.txt; do #dry inic
-    for num in {195..195}; do
+    for num in {12..20..2}; do
     cd /data/W.eddie/VVM/RUN/rst
-    frac=0.$num
+    frac=$(printf "%02d" $num)
 #    runname=tst
-    runname=test_${frac}circulation_const_WL6_08
-    sed -i "588,589s|\*.*$|\*${frac}|" $inif
+    runname=test_bubble_const_${frac}
+    sed -i "446s|\S\+\.|${num}.|" $inif
 
     if [ -e /data/W.eddie/VVM/DATA/${runname} ];then
         echo "/data/W.eddie/VVM/DATA/$runname exist! REMOVE DIR.!"
