@@ -515,7 +515,7 @@ CONTAINS
       W3D(:,:,:) = 0.
       U3DX(:,:,:) = 0.
       U3DY(:,:,:) = 0.
-      dynamic_file = "/data/W.eddie/VVM/DATA/test_bubble_const_10/archive/test_bubble_const_10.L.Dynamic-000018.nc"
+      dynamic_file = "/data/W.eddie/VVM/DATA/test_bubble_const_20/archive/test_bubble_const_20.L.Dynamic-000007.nc"
       CALL MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
       WRITE(*,*) "Rank:", rank, "Attempting to open file:", TRIM(dynamic_file)
 
