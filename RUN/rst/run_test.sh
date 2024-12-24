@@ -8,7 +8,7 @@ fi
 inif=/data/W.eddie/VVM/CODE/ini_3d_module.F
 #for txt in /data/W.eddie/GoAmazon_VVM/inic.txt; do
 for txt in /data/W.eddie/GoAmazon_VVM/inic_const.txt; do #dry inic
-    for num in {12..20..2}; do
+    for num in {2..24..2}; do
     cd /data/W.eddie/VVM/RUN/rst
     frac=$(printf "%02d" $num)
 #    runname=tst

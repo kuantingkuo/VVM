@@ -443,10 +443,10 @@ CONTAINS
 !*********************************************************
 
       levW = 2
-      valW = 20. ! mean value
+      valW = 24. ! mean value
 !      weightW = valW / 0.4626700755964605146 ! max. value theoretical value
       weightW = valW / 0.4748218472511392575 ! max. value calibrated by output
-      DIA = 4000. ! [m]
+      DIA = 5000. ! [m]
       pi_const = 3.14159265358979323846
       DO 500 K = 1, NK3
       DO 500 J = mjm,mjp
