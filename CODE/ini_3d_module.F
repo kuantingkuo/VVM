@@ -106,6 +106,7 @@ CONTAINS
       INTEGER :: nc_err, ncid, varid, rank
       INTEGER(KIND=mpi_offset_kind), DIMENSION(4) :: arraystart, readlen
       REAL, DIMENSION(1:MI1,1:MJ1,1:NK2) :: dummy3d
+      REAL (KIND=dbl_kind) :: DIA, R
 
       casename= 'GATE_PHASE_III'
 
@@ -515,7 +516,7 @@ CONTAINS
       W3D(:,:,:) = 0.
       U3DX(:,:,:) = 0.
       U3DY(:,:,:) = 0.
-      dynamic_file = "/data/W.eddie/VVM/DATA/test_bubble_const_20/archive/test_bubble_const_20.L.Dynamic-000007.nc"
+      dynamic_file = "/data/W.eddie/VVM/DATA/test512km_bubble_const_16/archive/test512km_bubble_const_16.L.Dynamic-000006.nc"
       CALL MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
       WRITE(*,*) "Rank:", rank, "Attempting to open file:", TRIM(dynamic_file)
 
@@ -599,6 +600,21 @@ CONTAINS
       STOP
       ENDIF
 
+      DIA = 4000. ! [m]
+      DO 600 K = 1, NK2
+      DO 600 J = mjm,mjp
+      DO 600 I = mim,mip
+      R = sqrt((real(mi1*ni_sbdm+I)-64.5)**2 + (real(mj1*nj_sbdm+J)-64.5)**2) * DX
+      IF (R .ge. DIA*5./2. .or. ZZ(K) .gt. 5000.) THEN
+          W3D(I,J,K) = 0.
+          U3DX(I,J,K) = 0.
+          U3DY(I,J,K) = 0.
+      ELSEIF (R .gt. DIA*3./2. .or. ZZ(K) .gt. 1500.) THEN
+          W3D(I,J,K) = W3D(I,J,K) * MIN(1. - (R-DIA*3./2.)/DIA, 1.) * MIN(1. - (ZZ(K)-1500.)/3500., 1.)
+          U3DX(I,J,K) = U3DX(I,J,K) * MIN(1. - (R-DIA*3./2.)/DIA, 1.) * MIN(1. - (ZZ(K)-1500.)/3500., 1.)
+          U3DY(I,J,K) = U3DY(I,J,K) * MIN(1. - (R-DIA*3./2.)/DIA, 1.) * MIN(1. - (ZZ(K)-1500.)/3500., 1.)
+      ENDIF
+  600 CONTINUE
 
       DO 620 K = 1, NK3
       DO 620 J = mjm,mjp

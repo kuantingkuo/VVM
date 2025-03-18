@@ -13,7 +13,7 @@
 # Example: make INTEL=true DEBUG=true
 
 set echo  # echoes the commands
-set expname = GoAmazon_const_t07_20
+set expname = GoAmazon_line58_14_t06
 
 # set job system and compiler
 set compiler = 'intel_mogamd'
